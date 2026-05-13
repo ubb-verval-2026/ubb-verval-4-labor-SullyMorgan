@@ -52,7 +52,7 @@ public class PersonTests
         try { task.Wait(); } catch { }
 
         // Assert
-        Assert.IsTrue(task.IsFaulted);
+        Assert.That(task.IsFaulted, Is.True);
     }
 
     [Test]
@@ -97,17 +97,32 @@ public class PersonTests
     public void IncreaseSalary_ZeroPercentIncrease_ShouldNotChange()
     {
         // throw new NotImplementedException();
+        var sut = PersonFactory.CreateTestPerson();
+        double initialSalary = sut.Salary;
+
+        sut.IncreaseSalary(0);
+
+        sut.Salary.Should().Be(initialSalary);
     }
 
     [Test]
     public void IncreaseSalary_NegativeIncrease_ShouldDecrease()
     {
         // throw new NotImplementedException();
+        var sut = PersonFactory.CreateTestPerson();
+        double initialSalary = sut.Salary;
+
+        sut.IncreaseSalary(-5);
+
+        sut.Salary.Should().BeLessThan(initialSalary);
     }
 
     [Test]
     public void IncreaseSalary_SmallerThanMinusTenPerc_ShouldFail()
     {
         // throw new NotImplementedException();
+        var sut = PersonFactory.CreateTestPerson();
+
+        sut.IncreaseSalary(-10);
     }
 }
