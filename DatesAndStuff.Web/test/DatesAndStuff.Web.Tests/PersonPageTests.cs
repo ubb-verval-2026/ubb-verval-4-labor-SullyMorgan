@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
@@ -127,6 +127,40 @@ public class PersonPageTests
         double actualSalary = double.Parse(finalSalaryText);
 
         actualSalary.Should().BeApproximately(expectedSalary, 0.001);
+    }
+
+    [Test]
+    public void IncreaseSalary_SmallerThanMinusTenPerc_ShouldDisplayErrorMessages()
+    {
+        // Arrange
+        driver.Navigate().GoToUrl(BaseURL);
+        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+
+        // Navigation
+        wait.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-test='PersonPageNavigation']"))).Click();
+
+        var salaryLabel = wait.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-test='DisplayedSalary']")));
+        string initialSalaryText = salaryLabel.Text;
+
+        string invalidPercentage = "-15";
+        var input = wait.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-test='SalaryIncreasePercentageInput']")));
+        input.Clear();
+        input.SendKeys(invalidPercentage);
+
+        // Act
+        var submitButton = driver.FindElement(By.XPath("//*[@data-test='SalaryIncreaseSubmitButton']"));
+        submitButton.Click();
+
+        // Assert
+        var fieldError = wait.Until(ExpectedConditions.ElementIsVisible(By.ClassName("validation-message")));
+
+        fieldError.Text.Should().Be("The specified percentag should be between -10 and infinity.");
+
+        var summaryError = wait.Until(ExpectedConditions.ElementIsVisible(By.ClassName("validation-errors")));
+        summaryError.Text.Should().Contain(fieldError.Text);
+
+        var finalSalaryLabel = driver.FindElement(By.XPath("//*[@data-test='DisplayedSalary']"));
+        finalSalaryLabel.Text.Should().Be(initialSalaryText);
     }
 
     private bool IsElementPresent(By by)
