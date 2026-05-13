@@ -105,26 +105,37 @@ public class PersonPageTests
         driver.Navigate().GoToUrl(BaseURL);
         var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
 
-        wait.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-test='PersonPageNavigation']"))).Click();
+        wait.Until(ExpectedConditions.ElementExists(
+            By.XPath("//*[@data-test='PersonPageNavigation']"))).Click();
 
-        var initialText = wait.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-test='DisplayedSalary']"))).Text;
-        double currentSalary = double.Parse(initialText);
+        double currentSalary = double.Parse(
+            wait.Until(ExpectedConditions.ElementExists(
+                By.XPath("//*[@data-test='DisplayedSalary']"))).Text);
 
         double expectedSalary = currentSalary * (1 + (percentage / 100));
 
-        var input = wait.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-test='SalaryIncreasePercentageInput']")));
+        var input = wait.Until(ExpectedConditions.ElementExists(
+            By.XPath("//*[@data-test='SalaryIncreasePercentageInput']")));
+
         input.Clear();
         input.SendKeys(percentage.ToString());
 
-        wait.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-test='SalaryIncreaseSubmitButton']"))).Click();
+        wait.Until(ExpectedConditions.ElementExists(
+            By.XPath("//*[@data-test='SalaryIncreaseSubmitButton']"))).Click();
 
-        wait.Until(d => {
-            var element = d.FindElement(By.XPath("//*[@data-test='DisplayedSalary']"));
-            return element.Text != initialText;
+        wait.Until(d =>
+        {
+            var salaryText = d.FindElement(
+                By.XPath("//*[@data-test='DisplayedSalary']")).Text;
+
+            double newSalary = double.Parse(salaryText);
+
+            return Math.Abs(newSalary - expectedSalary) < 0.001;
         });
 
-        var finalSalaryText = driver.FindElement(By.XPath("//*[@data-test='DisplayedSalary']")).Text;
-        double actualSalary = double.Parse(finalSalaryText);
+        double actualSalary = double.Parse(
+            driver.FindElement(
+                By.XPath("//*[@data-test='DisplayedSalary']")).Text);
 
         actualSalary.Should().BeApproximately(expectedSalary, 0.001);
     }
